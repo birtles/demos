@@ -1,0 +1,232 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset=utf-8>
+    <title>Superhero showdown</title>
+    <style>
+      body {
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+      }
+      .comparison-grid {
+        display: inline-block;
+      }
+      .comparison-grid > .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+      .comparison-grid > .row label {
+        flex: 1;
+        font-weight: bold;
+        font-size: 22px;
+        padding-left: 5px;
+      }
+      .comparison-grid > .row .track {
+        margin-left: 30px;
+        width: 600px;
+      }
+      .hero {
+        width: 100px;
+        margin-top: 10px;
+        margin-bottom: 8px;
+        display: block;
+      }
+      body:not(.with-wa) .wa-row {
+        display: none;
+      }
+      .wa-row {
+        background: #FFED00;
+      }
+      #css-transition {
+        fill: #82d1f5;
+        transition: transform 2s;
+      }
+      #css-animation {
+        fill: #ff8c8e;
+        animation: back-and-forth 4s infinite ease;
+      }
+      @keyframes back-and-forth {
+        50% {
+          transform: translate(500px);
+        }
+        50.01% {
+          transform: translate(500px) scaleX(-1);
+        }
+        to {
+          transform: translate(0px) scaleX(-1);
+        }
+      }
+      #greensock {
+        fill: #B6D806;
+      }
+      #velocity {
+        fill: #FABA00;
+      }
+      #waapi {
+        fill: #B0B2E9;
+      }
+      button {
+        display: block;
+        font-size: 25px;
+        font-weight: bold;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 20px;
+        padding: 10px 30px;
+        padding: 0.3em 1em;
+
+        color: white;
+        background-color: #e80000;
+        border: none;
+        box-shadow: 0 5px #9e0000;
+      }
+      button:active {
+        box-shadow: 0 2px #9e0000;
+        transform: translate(0, 3px);
+        color: lightgrey;
+      }
+    </style>
+    <script src="TweenMax.js"></script>
+    <script src="velocity.min.js"></script>
+    <script src="velocity.ui.js"></script>
+  </head>
+  <body>
+    <svg style="width: 0px; height: 0px">
+      <defs>
+        <g id="superhero">
+        <rect x="91" y="36.4" width="7.3" height="7"/>
+        <polygon points="48.7,67 48.7,74.1 73.1,74.1 73.1,43.4 88.9,43.4 88.9,36.4 73.1,36.4 63.4,36.4 63.4,45 48.7,45 48.7,65.4 
+          63.4,65.4 63.4,67 "/>
+        <polygon points="46.6,45 0,45 0,54.4 37.1,54.4 37.1,56 0,56 0,65.4 46.6,65.4 "/>
+        <rect x="40.5" y="67" width="6.1" height="7"/>
+        <ellipse transform="matrix(0.7071 -0.7071 0.7071 0.7071 -14.0161 76.646)" cx="85.5" cy="55.2" rx="8.1" ry="8.1"/>
+        <path d="M61.4,34.7l10.9,0.1L37.6,0c0,0-9.8,5.1-7.4,20.5c2.3,15.4-4.5,18.8-8.9,22.7l40.2,0L61.4,34.7z"/>
+      </defs>
+    </svg><div class=comparison-grid>
+      <div class=row>
+        <label>CSS Transitions</label>
+        <div class=track>
+          <div id="css-transition" class="hero">
+            <svg viewBox="0 0 98.3 74.1"><use href="#superhero" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class=row>
+        <label>CSS Animations</label>
+        <div class=track>
+          <div id="css-animation" class="hero">
+            <svg viewBox="0 0 98.3 74.1"><use href="#superhero" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class=row>
+        <label>GreenSock (JS)</label>
+        <div class=track>
+          <div id="greensock" class="hero">
+            <svg viewBox="0 0 98.3 74.1"><use href="#superhero" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class=row>
+        <label>Velocity.js</label>
+        <div class=track>
+          <div id="velocity" class="hero">
+            <svg viewBox="0 0 98.3 74.1"><use href="#superhero" /></svg>
+          </div>
+        </div>
+      </div>
+      <div class="row wa-row">
+        <label>Web Animations API</label>
+        <div class=track>
+          <div id="waapi" class="hero">
+            <svg viewBox="0 0 98.3 74.1"><use href="#superhero" /></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class=pause>忙しくさせる</button>
+    <script>
+'use strict';
+
+const transition = document.getElementById('css-transition');
+getComputedStyle(transition).transform;
+transition.style.transform = 'translate(500px)';
+transition.direction = 'right';
+let nextTransitionInterval = Infinity;
+setInterval(() => {
+  // Roughly guess when the next interval will end so we can avoid interrupting
+  // this routine.
+  nextTransitionInterval = window.performance.now() + 1950;
+
+  transition.direction = transition.direction == 'right' ? 'left' : 'right';
+
+  // Update scale without triggering a transform
+  const dur = getComputedStyle(transition).transitionDuration;
+  transition.style.transitionDuration = '0s';
+  transition.style.transform = transition.direction == 'right'
+                               ? ''
+                               : 'translate(500px) scaleX(-1)';
+  getComputedStyle(transition).transform;
+
+  // Update translate triggering transition
+  transition.style.transitionDuration = dur;
+  transition.style.transform = transition.direction == 'right'
+                               ? 'translate(500px)'
+                               : 'translate(0px) scaleX(-1)';
+  getComputedStyle(transition).transform;
+}, 2000);
+
+// Greensock
+const greensock = document.getElementById('greensock');
+const timeline = new TimelineMax({ repeat: -1 });
+timeline.to(greensock, 2, { x: 500, ease: Power1.easeInOut })
+        .set(greensock,   { scaleX: -1})
+        .to(greensock, 2, { x: 0, ease: Power1.easeInOut });
+
+// Velocity
+const velocity = document.getElementById('velocity');
+const sequence = [
+    { e: velocity, p: { scaleX: 1 },
+      o: { duration: 1 } },
+    { e: velocity, p: { translateX: 500 },
+      o: { duration: 2000, easing: "ease" } },
+    { e: velocity, p: { scaleX: -1 },
+      o: { duration: 1 } },
+    { e: velocity, p: { translateX: 0 },
+      o: { duration: 2000, easing: "ease",
+           complete: () => { Velocity.RunSequence(sequence) } } },
+];
+Velocity.RunSequence(sequence);
+
+// Web animations
+if (document.location.search == '?with-wa') {
+  const waapi = document.getElementById('waapi');
+  waapi.animate([ { transform: 'translate(0px)', easing: 'ease' },
+                  { transform: 'translate(500px)', offset: 0.5 },
+                  { transform: 'translate(500px) scaleX(-1)',
+                    offset: 0.5, easing: 'ease' },
+                  { transform: 'translate(0px) scaleX(-1)', offset: 1 } ],
+                { duration: 4000, iterations: Infinity });
+}
+
+// Pause button
+const pauseButton = document.querySelector('button.pause');
+pauseButton.addEventListener('click', () => {
+  window.setTimeout(pause, 10);
+});
+
+function pause() {
+  const start = window.performance.now();
+  const interval = Math.min(800, nextTransitionInterval - start);
+  while (window.performance.now() - start < interval);
+}
+
+// Enable web animations row
+if (document.location.search == '?with-wa') {
+  document.body.classList.add('with-wa');
+}
+    </script>
+  </body>
+</html>

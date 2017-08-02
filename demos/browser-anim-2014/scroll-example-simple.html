@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+  <meta charset=utf-8>
+  <title>Simple scrolling example</title>
+  <style>
+body {
+  overflow: hidden;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 30px;
+  line-height: 1.3;
+  margin: 0;
+  padding: 0;
+  padding-top: 50px;
+}
+.container {
+  display: flex;
+  justify-content: center;
+  width: 800px;
+  margin-top: 100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.container > .icon-and-buttons {
+  margin: 0 70px;
+}
+button {
+  font-size: 30px;
+  padding: 10px 40px;
+  height: 70px;
+  border-width: 1px;
+}
+button.active {
+  border: 1px solid #3B93B2;
+  background: #82D1F5;
+}
+.heart {
+  display: block;
+  margin-bottom: 20px;
+}
+.scroll-container {
+  width: 200px;
+  height: 300px;
+  overflow: auto;
+}
+.scroll-container .contents {
+  height: 4000px;
+  background: linear-gradient(white 0%, black 100%);
+}
+  </style>
+  <div class=container>
+    <div class=icon-and-buttons>
+      <svg class="heart" viewBox="0 0 100 90" width="200px">
+        <path d="M27.1,2C20.7,2,14.2,4.6,9.3,9.7c-9.8,10.3-9.8,26.7,0,36.9l38.4,40.4c1.1,1.2,3,1.2,4.1,0.1
+          c0,0,0.1-0.1,0.1-0.1c12.8-13.5,25.6-26.9,38.5-40.4c9.8-10.3,9.8-26.7,0-36.9c-9.8-10.3-25.8-10.3-35.6,0l-5,5.2l-5-5.2
+          C40,4.6,33.6,2,27.1,2z"
+          fill="#9E1E1E" stroke="#E57373" stroke-width="4" stroke-miterlimit="10"/>
+      </svg>
+      <button class=time-based>⏰</button>
+      <button class=scroll-based>↕</button>
+    </div>
+    <div class=scroll-container><div class=contents></div></div>
+  </div>
+  <script>
+const timeButton   = document.querySelector('.time-based');
+const scrollButton = document.querySelector('.scroll-based');
+const target       = document.querySelector('.heart');
+const scrollSource = document.querySelector('.scroll-container');
+
+timeButton.addEventListener('click', () => {
+  timeButton.classList.add('active');
+  scrollButton.classList.remove('active');
+
+  target.getAnimations().forEach(animation => { animation.cancel(); });
+  target.animate({ transform: 'scale(2)' }, 1000);
+});
+
+scrollButton.addEventListener('click', () => {
+  scrollButton.classList.add('active');
+  timeButton.classList.remove('active');
+
+  target.getAnimations().forEach(animation => { animation.cancel(); });
+
+  const animation = target.animate({ transform: 'scale(2)' },
+                                   { duration: 1000, fill: 'both' });
+  animation.timeline = new ScrollTimeline({ scrollSource });
+});
+
+  </script>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <meta charset=utf-8>
+  <title>Ok additive</title>
+  <style>
+body {
+  font-family: sans-serif;
+  overflow: hidden;
+}
+.button-bar {
+  width: 600px;
+  text-align: center;
+  margin: 1em auto;
+}
+.button-bar > button {
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+  padding: 0.5em 1em;
+  background-color: #e80000;
+  border: none;
+  box-shadow: 0 5px #9e0000;
+}
+.button-bar > button:active {
+  box-shadow: 0 2px #9e0000;
+  transform: translate(0, 3px);
+  color: lightgrey;
+}
+.button-bar > button.toggled {
+  box-shadow: 0 2px #9e0000;
+  transform: translate(0, 3px);
+}
+.script-result {
+  font-size: 22px;
+  font-weight: bold;
+  width: 800px;
+  margin: 1em auto;
+}
+.script-result pre {
+  line-height: 1.2em;
+  border: 3px dashed #FABA00;
+}
+.script-result pre code {
+  word-wrap: normal;
+  padding: 1em;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+}
+.img-container {
+  width: 100%;
+  text-align: center;
+}
+  </style>
+  <link rel="stylesheet" href="github-gist.css">
+  <script src="highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <body>
+    <div class=button-bar>
+      <button class=toggle data-anim=kaiten>回転</button>
+      <button class=toggle data-anim=kakudai>拡大</button>
+    </div>
+    <div class=script-result><pre><code>&hellip;</code></pre></div>
+    <div class=img-container>
+      <img src="sitting-foxkeh.svg" width="200">
+    </div>
+  </body>
+  <script>
+const target = document.querySelector('img');
+const result = document.querySelector('.script-result code');
+
+// We could use getAnimations() for this but we'd like this to work with
+// Chrome (and possibly the polyfill too, someday).
+let animations = [];
+
+const keyframes = {
+  'kaiten':  { transform: [ 'rotate(0turn)', 'rotate(1turn)' ] },
+  'kakudai': { transform: [ 'scale(1)', 'scale(2)' ] },
+};
+
+[].forEach.call(document.querySelectorAll('button'), button => {
+  const id = button.dataset.anim;
+  button.addEventListener('click', evt => {
+    // Add animation if it doesn't exist, drop it otherwise
+    const index = animations.map(animation => animation.id).indexOf(id);
+    if (index !== -1) {
+      animations[index].cancel();
+      animations.splice(index, 1);
+    } else {
+      animations.push(target.animate(keyframes[id], { duration: 1000,
+                                                      iterations: Infinity,
+                                                      composite: 'add',
+                                                      id }));
+    }
+    // Toggle button state
+    button.classList.toggle('toggled');
+    // Update output window
+    const animationSource = animations.map(animation =>
+        `target.animate(\n` +
+        `  ${JSON.stringify(keyframes[animation.id])},\n` +
+        `  { duration: 1000, iterations: Infinity,\n` +
+        `    composite: 'add' });`)
+        .join('\n');
+    result.innerText = animationSource || '(空)';
+    hljs.highlightBlock(result);
+  });
+});
+  </script>
+</html>

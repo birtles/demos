@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <meta charset=utf-8>
+  <title>Oh no, no additive</title>
+  <style>
+body {
+  font-family: sans-serif;
+  overflow: hidden;
+}
+.button-bar {
+  width: 600px;
+  text-align: center;
+  margin: 1em auto;
+}
+.button-bar > button {
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+  padding: 0.5em 1em;
+  background-color: #e80000;
+  border: none;
+  box-shadow: 0 5px #9e0000;
+}
+.button-bar > button:active {
+  box-shadow: 0 2px #9e0000;
+  transform: translate(0, 3px);
+  color: lightgrey;
+}
+.button-bar > button.toggled {
+  box-shadow: 0 2px #9e0000;
+  transform: translate(0, 3px);
+}
+.class-result {
+  font-size: 28px;
+  font-weight: bold;
+  background: #82D1F5;
+  padding: 0.5em 1em;
+  text-align: center;
+  width: 600px;
+  margin: 1em auto;
+}
+@keyframes kaiten {
+  from { transform: rotate(0turn); }
+  to   { transform: rotate(1turn); }
+}
+@keyframes kakudai {
+  from { transform: scale(1); }
+  to   { transform: scale(1.5); }
+}
+.img-container {
+  width: 100%;
+  text-align: center;
+}
+  </style>
+  <body>
+    <div class=button-bar>
+      <button class=toggle data-anim=kaiten>回転</button>
+      <button class=toggle data-anim=kakudai>拡大</button>
+    </div>
+    <div class=class-result>animation: &lt;none&gt;</div>
+    <div class=img-container>
+      <img src="sitting-foxkeh.svg" width="200">
+    </div>
+  </body>
+  <script>
+const target = document.querySelector('img');
+const result = document.querySelector('.class-result');
+
+[].forEach.call(document.querySelectorAll('button'), button => {
+  const keyframesName = button.dataset.anim;
+  button.addEventListener('click', evt => {
+    // Get current set of animations
+    let animations = getComputedStyle(target).animationName.split(', ');
+    // Add animation if it doesn't exist, drop it otherwise
+    const index = animations.indexOf(keyframesName);
+    if (index !== -1) {
+      animations.splice(index, 1);
+    } else {
+      animations.push(keyframesName);
+    }
+    // Drop 'none'
+    animations = animations.filter(name => name !== 'none');
+    // Update animation style
+    const animationStyle = animations.map(name => `${name} 1s infinite`)
+                             .join(', ')
+    target.style.animation = animationStyle;
+    // Toggle button state
+    button.classList.toggle('toggled');
+    // Update output window
+    result.innerText = `animation: ${animationStyle || '<none>'}`;
+  });
+});
+  </script>
+</html>

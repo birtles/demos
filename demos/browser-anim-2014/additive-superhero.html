@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <meta charset=utf-8>
+  <title>Additive superhero</title>
+  <style>
+body {
+  font-family: sans-serif;
+  overflow: hidden;
+}
+.hero {
+  width: 100px;
+  fill: #B0B2E9;
+}
+.playfield {
+  width: 800px;
+  height: 600px;
+  margin: auto;
+}
+  </style>
+  <link rel="stylesheet" href="github-gist.css">
+  <script src="highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <body>
+    <div class=playfield>
+      <svg class=hero viewBox="0 0 100 75">
+        <g id="superhero">
+        <rect x="91" y="36.4" width="7.3" height="7"/>
+        <polygon points="48.7,67 48.7,74.1 73.1,74.1 73.1,43.4 88.9,43.4 88.9,36.4 73.1,36.4 63.4,36.4 63.4,45 48.7,45 48.7,65.4 
+          63.4,65.4 63.4,67 "/>
+        <polygon points="46.6,45 0,45 0,54.4 37.1,54.4 37.1,56 0,56 0,65.4 46.6,65.4 "/>
+        <rect x="40.5" y="67" width="6.1" height="7"/>
+        <ellipse transform="matrix(0.7071 -0.7071 0.7071 0.7071 -14.0161 76.646)" cx="85.5" cy="55.2" rx="8.1" ry="8.1"/>
+        <path d="M61.4,34.7l10.9,0.1L37.6,0c0,0-9.8,5.1-7.4,20.5c2.3,15.4-4.5,18.8-8.9,22.7l40.2,0L61.4,34.7z"/>
+      </svg>
+    </div>
+  </body>
+  <script>
+const playfield = document.querySelector('.playfield');
+const rect = playfield.getBoundingClientRect();
+const xOffset = rect.left;
+const yOffset = rect.top;
+
+const hero = document.querySelector('.hero');
+const heroCs = getComputedStyle(hero);
+const heroWidth  = parseFloat(heroCs.width);
+const heroHeight = parseFloat(heroCs.height);
+
+playfield.addEventListener('click', evt => {
+  // Get destination coords
+  const destX = evt.clientX - xOffset - heroWidth  / 2;
+  const destY = evt.clientY - yOffset - heroHeight / 2;
+
+  // Get current coords
+  let currentX = 0;
+  let currentY = 0;
+  const currentTx = heroCs.transform;
+  if (currentTx !== 'none') {
+    const transformParts = currentTx.substring(7, currentTx.length - 1)
+                                    .split(', ')
+                                    .map(part => parseFloat(part, 10));
+    currentX = transformParts[4];
+    currentY = transformParts[5];
+  }
+
+  // Work out duration based on the distance
+  const dist = Math.sqrt(Math.pow(destX - currentX, 2) +
+                         Math.pow(destY - currentY, 2));
+  const duration = dist * 10;
+
+  // Work out angle to use too
+  const angle = Math.atan2(destY - currentY, destX - currentX);
+
+  // Animate it!
+  hero.animate({ transform:
+                   `translate(${destX}px, ${destY}px) rotate(${angle}rad)` },
+               { duration, fill: 'forwards',
+                 easing: 'ease' });
+});
+  </script>
+</html>
